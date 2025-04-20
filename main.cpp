@@ -21,7 +21,7 @@ int main() {
 
     // Load background
     sf::Texture bgTexture;
-    if (!bgTexture.loadFromFile("D:/My Documents/OOP/Project/images/pic.jpg")) {
+    if (!bgTexture.loadFromFile("D:/My Documents/OOP/Project/images/bg.png")) {
         std::cout << "Failed to load background image!" << std::endl;
         return -1;
     }
@@ -74,14 +74,14 @@ int main() {
 
     
     sf::Texture heartTexture;
-    if (!heartTexture.loadFromFile("D:/My Documents/OOP/Project/images/life.png")) {
+    if (!heartTexture.loadFromFile("D:/My Documents/OOP/Project/images/health.png")) {
         std::cout << "Failed to load heart image!" << std::endl;
         return -1;
     }
     sf::Sprite hearts[3];
     for (int i = 0; i < 3; ++i) {
         hearts[i].setTexture(heartTexture);
-        hearts[i].setScale(0.28f, 0.28f);
+        hearts[i].setScale(0.1f, 0.1f);
         hearts[i].setPosition(10 + i * 35, 70);
     }
 
@@ -103,6 +103,9 @@ int main() {
                     window.draw(levelclearText);
                     window.draw(finalScoreText);
                     window.draw(restartText);
+                    resetGame(player, enemies, enemyCount, score, health);
+                    isGameOver = false;
+                    enemySpawnClock.restart();
                 }
                 resetGame(player, enemies, enemyCount, score, health);
                 isGameOver = false;
@@ -122,6 +125,10 @@ int main() {
                 enemies[enemyCount - 1] = nullptr;
                 enemyCount--;
             }
+        }
+        //check score
+        if (score >= 100) {
+            isGameOver = true;
         }
         // Collision: Player and enemy bullets
        for (int i = 0; i < enemyCount; ++i) {

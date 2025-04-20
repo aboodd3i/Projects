@@ -178,8 +178,9 @@ int main() {
 
             // Spawn enemies
             if (enemySpawnClock.getElapsedTime().asSeconds() > 2.0f && enemyCount < 50) {
-                float x = static_cast<float>(rand() % 750);
-                enemies[enemyCount++] = new Enemy(x, -50);
+                float x = static_cast<float>(rand() % (window.getSize().x - 50));  // Safe X position
+                float y = static_cast<float>(rand() % (window.getSize().y / 3));   // Y between 0 and 300
+                enemies[enemyCount++] = new Enemy(x, y);
                 enemySpawnClock.restart();
             }
 

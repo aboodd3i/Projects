@@ -21,7 +21,7 @@ int main() {
 
     // Load background
     sf::Texture bgTexture;
-    if (!bgTexture.loadFromFile("C:/Users/Hamza/Downloads/background1.png")) {
+    if (!bgTexture.loadFromFile("D:/My Documents/OOP/Project/images/pic.jpg")) {
         std::cout << "Failed to load background image!" << std::endl;
         return -1;
     }
@@ -38,7 +38,7 @@ int main() {
 
     // Score and UI
     int score = 0, health = 3;
-    sf::Text scoreText, lifeText, gameOverText, finalScoreText, restartText;
+    sf::Text scoreText, lifeText, gameOverText, finalScoreText, restartText, levelclearText;
     scoreText.setFont(font);
     scoreText.setCharacterSize(24);
     scoreText.setFillColor(sf::Color::White);
@@ -48,6 +48,12 @@ int main() {
     lifeText.setCharacterSize(20);
     lifeText.setFillColor(sf::Color::White);
     lifeText.setPosition(10, 40);
+
+    levelclearText.setFont(font);
+    levelclearText.setCharacterSize(48);
+    levelclearText.setFillColor(sf::Color::Green);
+    levelclearText.setString("LEVEL CLEARED");
+    levelclearText.setPosition(250, 200);
 
     gameOverText.setFont(font);
     gameOverText.setCharacterSize(48);
@@ -66,16 +72,16 @@ int main() {
     restartText.setString("Press R to Restart");
     restartText.setPosition(250, 320);
 
-    // Hearts
+    
     sf::Texture heartTexture;
-    if (!heartTexture.loadFromFile("C:/Users/Hamza/Downloads/heart1.png")) {
+    if (!heartTexture.loadFromFile("D:/My Documents/OOP/Project/images/life.png")) {
         std::cout << "Failed to load heart image!" << std::endl;
         return -1;
     }
     sf::Sprite hearts[3];
     for (int i = 0; i < 3; ++i) {
         hearts[i].setTexture(heartTexture);
-        hearts[i].setScale(0.05f, 0.05f);
+        hearts[i].setScale(0.28f, 0.28f);
         hearts[i].setPosition(10 + i * 35, 70);
     }
 
@@ -92,7 +98,12 @@ int main() {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (isGameOver && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
+            if (isGameOver && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R ) {
+                if (score >= 100) {
+                    window.draw(levelclearText);
+                    window.draw(finalScoreText);
+                    window.draw(restartText);
+                }
                 resetGame(player, enemies, enemyCount, score, health);
                 isGameOver = false;
                 enemySpawnClock.restart();
@@ -112,6 +123,44 @@ int main() {
                 enemyCount--;
             }
         }
+        // Collision: Player and enemy bullets
+       for (int i = 0; i < enemyCount; ++i) {
+            if (!enemies[i]) continue;
+
+            Bullet** enemyBullets = enemies[i]->getBullets();
+            for (int j = 0; j < 10; ++j) {
+                if (!enemyBullets[j]) continue;
+
+                if (player.getBounds().intersects(enemyBullets[j]->getBounds())) {
+                    delete enemyBullets[j];
+    
+                    for (int k = j; k < 9; ++k) {
+                        enemyBullets[k] = enemyBullets[k + 1];
+                    }
+                    enemyBullets[9] = nullptr;
+                    health--;
+                    if (health <= 0) {
+                        isGameOver = true;
+                        finalScoreText.setString("Final Score: " + std::to_string(score));
+                        window.draw(gameOverText);
+                        window.draw(finalScoreText);
+                        window.draw(restartText);
+                        window.display();
+                        if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
+                            resetGame(player, enemies, enemyCount, score, health);
+                            isGameOver = false;
+                            enemySpawnClock.restart();
+                            
+                        }
+                        
+                        
+                    }
+                    break;
+                }
+            }
+        }
+
+
 
 
         if (!isGameOver) {

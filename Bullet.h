@@ -14,7 +14,7 @@ public:
             std::cout << "Failed to load bullet image from: " << imagePath << std::endl;
         }
         sprite.setTexture(texture);
-        sprite.setScale(0.05f, 0.05f);
+        sprite.setScale(0.13f, 0.13f);
         sprite.setPosition(x, y);
         speed = bulletSpeed;
     }

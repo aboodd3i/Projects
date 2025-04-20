@@ -13,11 +13,11 @@ private:
 
 public:
     Player() {
-        if (!texture.loadFromFile("C:/Users/Hamza/Downloads/player2.png")) {
+        if (!texture.loadFromFile("D:/My Documents/OOP/Project/images/player2.png")) {
             std::cout << "Failed to load player texture!" << std::endl;
         }
         sprite.setTexture(texture);
-        sprite.setScale(0.2f, 0.2f);
+        sprite.setScale(0.23f, 0.23f);
         sprite.setPosition(400, 500);
 
         bulletCount = 0;
@@ -52,7 +52,7 @@ public:
 
     void shoot() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::X) && shootTimer.getElapsedTime().asSeconds() > 0.5f && bulletCount < 50) {
-            bullets[bulletCount++] = new Bullet(sprite.getPosition().x + 35, sprite.getPosition().y - 20, "C:/Users/Hamza/Downloads/bullet2.png", 7.0f);
+            bullets[bulletCount++] = new Bullet(sprite.getPosition().x + 35, sprite.getPosition().y - 20, "D:/My Documents/OOP/Project/images/bullet2.png", 7.0f);
             shootTimer.restart();
         }
     }

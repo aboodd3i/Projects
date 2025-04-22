@@ -19,6 +19,7 @@ public:
         speed = bulletSpeed;
     }
 
+
     void update() {
         sprite.move(0, -speed); // upward by default
     }

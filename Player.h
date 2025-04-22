@@ -13,7 +13,7 @@ private:
 
 public:
     Player() {
-        if (!texture.loadFromFile("D:/My Documents/OOP/Project/images/player2.png")) {
+        if (!texture.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/Spacecraft.png")) {
             std::cout << "Failed to load player texture!" << std::endl;
         }
         sprite.setTexture(texture);
@@ -52,7 +52,16 @@ public:
 
     void shoot() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::X) && shootTimer.getElapsedTime().asSeconds() > 0.5f && bulletCount < 50) {
-            bullets[bulletCount++] = new Bullet(sprite.getPosition().x + 35, sprite.getPosition().y - 20, "D:/My Documents/OOP/Project/images/bullet2.png", 7.0f);
+            bullets[bulletCount++] = new Bullet(sprite.getPosition().x + 35, sprite.getPosition().y - 20, "C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/Fire Bullet.png", 7.0f);
+            /*sf::SoundBuffer bulletbuffer;
+            bulletbuffer.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/bullet.wav");
+            if (!bulletbuffer.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/bullet.wav")) {
+                std::cout << "Failed to load sound!" << std::endl;
+                return -1;
+            }
+            sf::Sound bullet;
+            bullet.setBuffer(bulletbuffer);
+            bullet.play();*/
             shootTimer.restart();
         }
     }

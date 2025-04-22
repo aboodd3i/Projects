@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include "Player.h"
 #include "Enemy.h"
@@ -15,13 +16,14 @@ void resetGame(Player& player, Enemy* enemies[], int& enemyCount, int& score, in
     health = 3;
 }
 
+
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 600), "Space Shooter");
     window.setFramerateLimit(60);
 
     // Load background
     sf::Texture bgTexture;
-    if (!bgTexture.loadFromFile("D:/My Documents/OOP/Project/images/bg.png")) {
+    if (!bgTexture.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/bg_star3.png")) {
         std::cout << "Failed to load background image!" << std::endl;
         return -1;
     }
@@ -31,10 +33,29 @@ int main() {
 
     // Load font
     sf::Font font;
-    if (!font.loadFromFile("C:/Windows/Fonts/ARIAL.ttf")) {
+    if (!font.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/Orbitron/Orbitron-VariableFont_wght.ttf")) {
         std::cout << "Failed to load font!" << std::endl;
         return -1;
     }
+    //audio setup
+    sf::SoundBuffer chicken_dyingbuffer;
+    chicken_dyingbuffer.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/chicken_dying.wav");
+    if (!chicken_dyingbuffer.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/chicken_dying.wav")) {
+        std::cout << "Failed to load sound!" << std::endl;
+        return -1;
+    }
+    sf::Sound chicken_dying;
+    chicken_dying.setBuffer(chicken_dyingbuffer);
+
+    sf::SoundBuffer bulletbuffer;
+    bulletbuffer.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/bullet.wav");
+    if (!bulletbuffer.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/bullet.wav")) {
+        std::cout << "Failed to load sound!" << std::endl;
+        return -1;
+    }
+    sf::Sound bullet;
+    bullet.setBuffer(bulletbuffer);
+
 
     // Score and UI
     int score = 0, health = 3;
@@ -72,9 +93,9 @@ int main() {
     restartText.setString("Press R to Restart");
     restartText.setPosition(250, 320);
 
-    
+
     sf::Texture heartTexture;
-    if (!heartTexture.loadFromFile("D:/My Documents/OOP/Project/images/health.png")) {
+    if (!heartTexture.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/Hit Points.png")) {
         std::cout << "Failed to load heart image!" << std::endl;
         return -1;
     }
@@ -98,15 +119,8 @@ int main() {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (isGameOver && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R ) {
-                if (score >= 100) {
-                    window.draw(levelclearText);
-                    window.draw(finalScoreText);
-                    window.draw(restartText);
-                    resetGame(player, enemies, enemyCount, score, health);
-                    isGameOver = false;
-                    enemySpawnClock.restart();
-                }
+            if (isGameOver && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
+                
                 resetGame(player, enemies, enemyCount, score, health);
                 isGameOver = false;
                 enemySpawnClock.restart();
@@ -129,9 +143,15 @@ int main() {
         //check score
         if (score >= 100) {
             isGameOver = true;
+            window.draw(levelclearText);
+            window.draw(finalScoreText);
+            window.draw(restartText);
+            window.display();
         }
+
         // Collision: Player and enemy bullets
-       for (int i = 0; i < enemyCount; ++i) {
+        
+        for (int i = 0; i < enemyCount; ++i) {
             if (!enemies[i]) continue;
 
             Bullet** enemyBullets = enemies[i]->getBullets();
@@ -140,12 +160,13 @@ int main() {
 
                 if (player.getBounds().intersects(enemyBullets[j]->getBounds())) {
                     delete enemyBullets[j];
-    
+
                     for (int k = j; k < 9; ++k) {
                         enemyBullets[k] = enemyBullets[k + 1];
                     }
                     enemyBullets[9] = nullptr;
                     health--;
+                    
                     if (health <= 0) {
                         isGameOver = true;
                         finalScoreText.setString("Final Score: " + std::to_string(score));
@@ -153,14 +174,14 @@ int main() {
                         window.draw(finalScoreText);
                         window.draw(restartText);
                         window.display();
-                        if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
+                        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
                             resetGame(player, enemies, enemyCount, score, health);
                             isGameOver = false;
                             enemySpawnClock.restart();
-                            
+
                         }
-                        
-                        
+
+
                     }
                     break;
                 }
@@ -174,12 +195,13 @@ int main() {
             // Player controls
             player.move();
             player.shoot();
+            //bullet.play();
             player.updateBullets();
 
             // Spawn enemies
-            if (enemySpawnClock.getElapsedTime().asSeconds() > 2.0f && enemyCount < 50) {
-                float x = static_cast<float>(rand() % (window.getSize().x - 50));  // Safe X position
-                float y = static_cast<float>(rand() % (window.getSize().y / 3));   // Y between 0 and 300
+            if (enemySpawnClock.getElapsedTime().asSeconds() > 1.0f && enemyCount < 50) {
+                float x = static_cast<float>(rand() % (window.getSize().x - 100));  // Safe X position
+                float y = static_cast<float>(rand() % (window.getSize().y / 4));   // Y between 0 and 300
                 enemies[enemyCount++] = new Enemy(x, y);
                 enemySpawnClock.restart();
             }
@@ -197,6 +219,7 @@ int main() {
             }
 
             // Bullet-enemy collision
+            
             for (int i = 0; i < player.getBulletCount(); ++i) {
                 Bullet** bullets = player.getBullets();
                 if (!bullets[i]) continue;
@@ -204,6 +227,7 @@ int main() {
                     if (enemies[j] && bullets[i]->getBounds().intersects(enemies[j]->getBounds())) {
                         player.removeBullet(i);
                         delete enemies[j];
+                        chicken_dying.play();
                         enemies[j] = enemies[--enemyCount];
                         enemies[enemyCount] = nullptr;
                         score += 10;

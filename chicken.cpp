@@ -163,7 +163,7 @@ int main() {
     // Game entities
     Player player;
     Enemy* enemies[50];
-    PirateChicken* pirateChickens[30];
+    PirateChicken* pirateChickens[50];
     int pirateCount = 0;
 
 
@@ -491,8 +491,9 @@ int main() {
             }
 
 
-            if (pirateSpawnClock.getElapsedTime().asSeconds() > 5.0f && pirateCount < 10) {
-                pirateChickens[pirateCount++] = new PirateChicken(rand() % 700, -50);  // random x position
+            if (pirateSpawnClock.getElapsedTime().asSeconds() > 2.0f && pirateCount < 10) {
+                pirateChickens[pirateCount++] = new PirateChicken(rand() % 400, -50);
+                // random x position
                 pirateSpawnClock.restart();
             }
             for (int i = 0; i < pirateCount; ++i) {
@@ -603,13 +604,7 @@ int main() {
                 window.draw(restartText);
             }
 
-
-
             window.display();
-
-
-
-
         }
 
     }

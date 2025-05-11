@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Bullet.h"
+#include "PirateChicken.h"
 
 void resetGame(Player& player, Enemy* enemies[], int& enemyCount, int& score, int& health) {
     player.reset();
@@ -12,9 +13,10 @@ void resetGame(Player& player, Enemy* enemies[], int& enemyCount, int& score, in
         enemies[i] = nullptr;
     }
     enemyCount = 0;
+   
     score = 0;
     health = 3;
-   
+
 }
 
 
@@ -48,6 +50,14 @@ int main() {
     sf::Sound chicken_dying;
     chicken_dying.setBuffer(chicken_dyingbuffer);
 
+    /*sf::SoundBuffer egg_collisionbuffer;
+    if (!egg_collisionbuffer.loadFromFile("D:/My Documents/OOP/Project/audio/egg_collisionbuffer")) {
+        std::cout << "Failed to load sound!" << std::endl;
+        return -1;
+    }
+    sf::Sound egg_collision;
+    egg_collision.setBuffer(egg_collisionbuffer);*/
+
 
     sf::SoundBuffer backgroundbuffer;
     backgroundbuffer.loadFromFile("D:/My Documents/OOP/Project/audio/background.wav");
@@ -57,6 +67,14 @@ int main() {
     }
     sf::Sound background;
     background.setBuffer(backgroundbuffer);
+
+    sf::SoundBuffer background2buffer;
+    if (!background2buffer.loadFromFile("D:/My Documents/OOP/Project/audio/background.wav")) {
+        std::cout << "Failed to load sound!" << std::endl;
+        return -1;
+    }
+    sf::Sound background2;
+    background2.setBuffer(backgroundbuffer);
 
 
     sf::SoundBuffer bulletbuffer;
@@ -73,6 +91,10 @@ int main() {
     background.setVolume(80);
     chicken_dying.setVolume(40);
 
+    background2.setLoop(true);
+    background2.play();
+    background2.setVolume(80);
+
     sf::SoundBuffer transitionbuffer;
     transitionbuffer.loadFromFile("D:/My Documents/OOP/Project/audio/transition.wav");
     if (!transitionbuffer.loadFromFile("D:/My Documents/OOP/Project/audio/transition.wav")) {
@@ -82,7 +104,7 @@ int main() {
     sf::Sound transition;
     transition.setBuffer(transitionbuffer);
 
-    
+
 
     sf::Clock transitionClock;
     float fadeAlpha = 0.0f;
@@ -104,7 +126,7 @@ int main() {
     levelclearText.setFont(font);
     levelclearText.setCharacterSize(48);
     levelclearText.setFillColor(sf::Color::Green);
-    levelclearText.setString("LEVEL CLEARED");
+    levelclearText.setString("GAME CLEARED");
     levelclearText.setPosition(250, 200);
 
     gameOverText.setFont(font);
@@ -140,17 +162,21 @@ int main() {
     // Game entities
     Player player;
     Enemy* enemies[50];
+    PirateChicken* pirateChickens[30];
+    int pirateCount = 0;
+    
+    
     int enemyCount = 0;
     sf::Clock enemySpawnClock;
-
+    sf::Clock pirateSpawnClock;
     bool isGameOver = false;
 
 
     enum GameState { LEVEL1, TRANSITION_TO_LEVEL2, LEVEL2 };
     GameState gameState = LEVEL1;
     sf::Clock deltaClock;
-    
-    
+
+
 
 
     while (window.isOpen()) {
@@ -188,7 +214,7 @@ int main() {
                 }
             }
             //check score
-            if (score >= 250) {
+            if (score >= 50) {
                 /*isGameOver = true;
                 window.draw(levelclearText);
                 window.draw(finalScoreText);
@@ -360,8 +386,8 @@ int main() {
             backgroundScrollSpeed += 50.0f * deltaTime;
 
             // Scroll backgrounds
-            bgSprite.move(0.0f, backgroundScrollSpeed* deltaTime);
-            bgSprite2.move(0.0f, backgroundScrollSpeed* deltaTime);
+            bgSprite.move(0.0f, backgroundScrollSpeed * deltaTime);
+            bgSprite2.move(0.0f, backgroundScrollSpeed * deltaTime);
 
             // If backgrounds move out of screen, reset (your original logic)
             if (bgSprite.getPosition().y >= 600)
@@ -396,6 +422,8 @@ int main() {
             }
 
             // Draw everything
+            if (bgSprite.getPosition().y >= 600) bgSprite.setPosition(0, -600);
+            if (bgSprite2.getPosition().y >= 600) bgSprite2.setPosition(0, -600);
             window.clear();
             window.draw(bgSprite);
             window.draw(bgSprite2);
@@ -406,14 +434,65 @@ int main() {
             sf::RectangleShape fadeRect(sf::Vector2f(800, 600)); // your window size
             fadeRect.setFillColor(sf::Color(0, 0, 0, static_cast<sf::Uint8>(fadeAlpha)));
             window.draw(fadeRect);
-            
+
             window.display();
         }
         else if (gameState == LEVEL2) {
+            window.clear();
+            window.draw(bgSprite);
+            window.draw(bgSprite2);
+            bgSprite.move(0, 3);
+            bgSprite2.move(0, 3);
+            player.draw(window);
+            player.drawBullets(window);
+            player.move();
+            player.shoot();
+            player.updateBullets();
+
+
+
+            if (pirateSpawnClock.getElapsedTime().asSeconds() > 5.0f && pirateCount < 10) {
+                pirateChickens[pirateCount++] = new PirateChicken(rand() % 700, -50);  // random x position
+                pirateSpawnClock.restart();
+            }
+            for (int i = 0; i < pirateCount; ++i) {
+                if (pirateChickens[i]) {
+                    pirateChickens[i]->update();
+                    pirateChickens[i]->draw(window);
+                    pirateChickens[i]->updateBullets();
+                    pirateChickens[i]->drawBullets(window);
+                }
+            }
+            for (int i = 0; i < pirateCount; ++i) {
+                if (!pirateChickens[i]) continue;
+
+                for (int j = player.getBulletCount() - 1; j >= 0; --j) {
+                    Bullet* b = player.getBullets()[j];
+                    if (b && pirateChickens[i]->getBounds().intersects(b->getBounds())) {
+                        if (pirateChickens[i]->takeHit()) {
+                            chicken_dying.play();
+                            delete pirateChickens[i];
+                            pirateChickens[i] = pirateChickens[--pirateCount];
+                            pirateChickens[pirateCount] = nullptr;
+                            --i; // re-check current index
+                        }
+                        player.removeBullet(j);
+                        break;
+                    }
+                }
+            }
+            window.display();
+
+
+
 
         }
-        
-    }
 
+    }
+    for (int i = 0; i < enemyCount; ++i) {
+        delete enemies[i];
+        enemies[i] = nullptr;
+    }
+    enemyCount = 0;
     return 0;
 }

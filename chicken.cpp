@@ -216,7 +216,7 @@ int main() {
             }
             //check score
             if (score >= 150) {
-            
+
                 background.stop();
                 gameState = TRANSITION_TO_LEVEL2;
             }
@@ -452,14 +452,14 @@ int main() {
                     enemySpawnClock.restart();
                 }
             }
-            if (score >= 100) {
+            if (score >= 250) {
                 isGameOver = true;
                 window.draw(levelclearText);
                 window.draw(finalScoreText);
                 background.stop();
                 window.display();
                 window.close();
-                
+
             }
 
             float bgHeight = bgSprite.getTexture()->getSize().y;
@@ -551,7 +551,7 @@ int main() {
                             window.draw(finalScoreText);
                             window.draw(restartText);
                             window.display();
-                            
+
                             while (window.pollEvent(event)) {
                                 if (event.type == sf::Event::Closed)
                                     window.close();

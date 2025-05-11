@@ -215,12 +215,8 @@ int main() {
                 }
             }
             //check score
-            if (score >= 50) {
-                /*isGameOver = true;
-                window.draw(levelclearText);
-                window.draw(finalScoreText);
-                window.draw(restartText);
-                window.display();*/
+            if (score >= 150) {
+            
                 background.stop();
                 gameState = TRANSITION_TO_LEVEL2;
             }
@@ -379,6 +375,7 @@ int main() {
         else if (gameState == TRANSITION_TO_LEVEL2) {
             if (!transitionSoundPlayed)
             {
+                background.stop();
                 transition.play();
                 transitionSoundPlayed = true;
                 transitionClock.restart();
@@ -442,6 +439,7 @@ int main() {
             window.clear();
             window.draw(bgSprite);
             window.draw(bgSprite2);
+            background.play();
 
             sf::Event event;
             while (window.pollEvent(event)) {

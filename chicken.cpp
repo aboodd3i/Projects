@@ -233,6 +233,7 @@ int main() {
                     if (!enemyBullets[j]) continue;
 
                     if (player.getBounds().intersects(enemyBullets[j]->getBounds())) {
+                        egg_collision.play();
                         delete enemyBullets[j];
 
                         for (int k = j; k < 9; ++k) {
@@ -534,6 +535,7 @@ int main() {
                     if (!enemyBullets[j]) continue;
 
                     if (player.getBounds().intersects(enemyBullets[j]->getBounds())) {
+                        egg_collision.play();
                         delete enemyBullets[j];
 
                         for (int k = j; k < 9; ++k) {
@@ -542,7 +544,7 @@ int main() {
                         }
                         enemyBullets[9] = nullptr;
                         health--;
-                        egg_collision.play();
+                        
                         if (health <= 0) {
                             isGameOver = true;
                             background.stop();

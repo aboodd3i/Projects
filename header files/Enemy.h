@@ -4,7 +4,7 @@
 #include <iostream>
 
 class Enemy {
-private:
+protected:
     sf::Texture texture;
     sf::Sprite sprite;
 
@@ -14,7 +14,7 @@ private:
 
 public:
     Enemy(float x, float y) {
-        if (!texture.loadFromFile("C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/ChickenLevel2.png")) {
+        if (!texture.loadFromFile("D:/My Documents/OOP/Project/images/enemy2.png")) {
             std::cout << "Failed to load enemy image!" << std::endl;
         }
         sprite.setTexture(texture);
@@ -26,7 +26,7 @@ public:
     }
 
     void update() {
-        sprite.move(3.0f, 2);
+        sprite.move(3.5f, 2.5);
 
         // Automatic shooting
         if (shootClock.getElapsedTime().asSeconds() > 1.0f && bulletCount < 10) {
@@ -37,7 +37,7 @@ public:
 
     void shoot() {
         sf::Vector2f pos = sprite.getPosition();
-        bullets[bulletCount++] = new Bullet(pos.x + 20, pos.y + 40, "C:/Users/Choudry Shb/source/repos/Chicken_Invaders/assets/Egg.png", 5.0f);
+        bullets[bulletCount++] = new Bullet(pos.x + 20, pos.y + 40, "D:/My Documents/OOP/Project/images/egg1.png", 5.0f);
     }
 
     void updateBullets() {

@@ -13,7 +13,7 @@ void resetGame(Player& player, Enemy* enemies[], int& enemyCount, int& score, in
         enemies[i] = nullptr;
     }
     enemyCount = 0;
-   
+
     score = 0;
     health = 3;
 
@@ -21,6 +21,7 @@ void resetGame(Player& player, Enemy* enemies[], int& enemyCount, int& score, in
 
 
 int main() {
+
     sf::RenderWindow window(sf::VideoMode(800, 600), "Space Shooter");
     window.setFramerateLimit(60);
 
@@ -50,13 +51,13 @@ int main() {
     sf::Sound chicken_dying;
     chicken_dying.setBuffer(chicken_dyingbuffer);
 
-    /*sf::SoundBuffer egg_collisionbuffer;
-    if (!egg_collisionbuffer.loadFromFile("D:/My Documents/OOP/Project/audio/egg_collisionbuffer")) {
+    sf::SoundBuffer egg_collisionbuffer;
+    if (!egg_collisionbuffer.loadFromFile("D:/My Documents/OOP/Project/audio/egg_collision.wav")) {
         std::cout << "Failed to load sound!" << std::endl;
         return -1;
     }
     sf::Sound egg_collision;
-    egg_collision.setBuffer(egg_collisionbuffer);*/
+    egg_collision.setBuffer(egg_collisionbuffer);
 
 
     sf::SoundBuffer backgroundbuffer;
@@ -164,8 +165,8 @@ int main() {
     Enemy* enemies[50];
     PirateChicken* pirateChickens[30];
     int pirateCount = 0;
-    
-    
+
+
     int enemyCount = 0;
     sf::Clock enemySpawnClock;
     sf::Clock pirateSpawnClock;
@@ -220,8 +221,8 @@ int main() {
                 window.draw(finalScoreText);
                 window.draw(restartText);
                 window.display();*/
-                gameState = TRANSITION_TO_LEVEL2;
                 background.stop();
+                gameState = TRANSITION_TO_LEVEL2;
             }
 
             // Collision: Player and enemy bullets
@@ -441,7 +442,27 @@ int main() {
             window.clear();
             window.draw(bgSprite);
             window.draw(bgSprite2);
-            
+
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed)
+                    window.close();
+                if (isGameOver && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
+                    background.stop();
+                    resetGame(player, enemies, enemyCount, score, health);
+                    isGameOver = false;
+                    enemySpawnClock.restart();
+                }
+            }
+            if (score >= 100) {
+                isGameOver = true;
+                window.draw(levelclearText);
+                window.draw(finalScoreText);
+                window.draw(restartText);
+                background.stop();
+                window.display();
+                
+            }
 
             float bgHeight = bgSprite.getTexture()->getSize().y;
 
@@ -464,6 +485,11 @@ int main() {
             player.shoot();
             player.updateBullets();
 
+            sf::Texture heartTexture;
+            if (!heartTexture.loadFromFile("D:/My Documents/OOP/Project/images/health.png")) {
+                std::cout << "Failed to load heart image!" << std::endl;
+                return -1;
+            }
 
 
             if (pirateSpawnClock.getElapsedTime().asSeconds() > 5.0f && pirateCount < 10) {
@@ -486,6 +512,9 @@ int main() {
                     if (b && pirateChickens[i]->getBounds().intersects(b->getBounds())) {
                         if (pirateChickens[i]->takeHit()) {
                             chicken_dying.play();
+                            score += 10;
+                            scoreText.setString("Score: " + std::to_string(score));
+                            window.draw(scoreText);
                             delete pirateChickens[i];
                             pirateChickens[i] = pirateChickens[--pirateCount];
                             pirateChickens[pirateCount] = nullptr;
@@ -496,6 +525,86 @@ int main() {
                     }
                 }
             }
+            //enemy_bullet-player collision
+            for (int i = 0; i < pirateCount; ++i) {
+                if (!pirateChickens[i]) continue;
+                if (isGameOver) { break; }
+
+                Bullet** enemyBullets = pirateChickens[i]->getBullets();
+                for (int j = 0; j < 10; ++j) {
+                    if (isGameOver) { break; }
+                    if (!enemyBullets[j]) continue;
+
+                    if (player.getBounds().intersects(enemyBullets[j]->getBounds())) {
+                        delete enemyBullets[j];
+
+                        for (int k = j; k < 9; ++k) {
+                            enemyBullets[k] = enemyBullets[k + 1];
+                            if (isGameOver) { break; }
+                        }
+                        enemyBullets[9] = nullptr;
+                        health--;
+
+                        if (health <= 0) {
+                            isGameOver = true;
+                            background.stop();
+                            finalScoreText.setString("Final Score: " + std::to_string(score));
+                            window.draw(gameOverText);
+                            window.draw(finalScoreText);
+                            window.draw(restartText);
+                            window.display();
+                            
+                            while (window.pollEvent(event)) {
+                                if (event.type == sf::Event::Closed)
+                                    window.close();
+                                if (isGameOver && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
+                                    background.stop();
+                                    resetGame(player, enemies, enemyCount, score, health);
+                                    isGameOver = false;
+                                    enemySpawnClock.restart();
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            //enemy-player collision
+            for (int i = 0; i < pirateCount; ++i) {
+                if (isGameOver) { break; }
+                if (player.getBounds().intersects(pirateChickens[i]->getBounds())) {
+                    health--;
+                    if (health == 0)
+                        isGameOver = true;
+                    delete pirateChickens[i];
+                    pirateChickens[i] = pirateChickens[--pirateCount];
+                    pirateChickens[pirateCount] = nullptr;
+                    i--;
+                }
+            }
+
+
+            for (int i = 0; i < 3; ++i) {
+                hearts[i].setTexture(heartTexture);
+                hearts[i].setScale(0.1f, 0.1f);
+                hearts[i].setPosition(10 + i * 35, 70);
+            }
+            for (int i = 0; i < health; ++i)
+                window.draw(hearts[i]);
+            scoreText.setString("Score: " + std::to_string(score));
+            lifeText.setString("Lives: " + std::to_string(health));
+            window.draw(scoreText);
+            window.draw(lifeText);
+
+            if (isGameOver) {
+                finalScoreText.setString("Final Score: " + std::to_string(score));
+                window.draw(gameOverText);
+                window.draw(finalScoreText);
+                window.draw(restartText);
+            }
+
+
+
             window.display();
 
 

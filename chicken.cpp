@@ -458,9 +458,9 @@ int main() {
                 isGameOver = true;
                 window.draw(levelclearText);
                 window.draw(finalScoreText);
-                window.draw(restartText);
                 background.stop();
                 window.display();
+                window.close();
                 
             }
 
@@ -544,7 +544,7 @@ int main() {
                         }
                         enemyBullets[9] = nullptr;
                         health--;
-
+                        egg_collision.play();
                         if (health <= 0) {
                             isGameOver = true;
                             background.stop();

@@ -441,8 +441,23 @@ int main() {
             window.clear();
             window.draw(bgSprite);
             window.draw(bgSprite2);
+            
+
+            float bgHeight = bgSprite.getTexture()->getSize().y;
+
+            // Scroll both sprites
             bgSprite.move(0, 3);
             bgSprite2.move(0, 3);
+
+            // Reset position when a sprite moves off the bottom
+            if (bgSprite.getPosition().y >= bgHeight) {
+                bgSprite.setPosition(0, bgSprite2.getPosition().y - bgHeight);
+            }
+            if (bgSprite2.getPosition().y >= bgHeight) {
+                bgSprite2.setPosition(0, bgSprite.getPosition().y - bgHeight);
+            }
+
+
             player.draw(window);
             player.drawBullets(window);
             player.move();
